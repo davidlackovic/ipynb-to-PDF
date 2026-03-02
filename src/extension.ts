@@ -5,32 +5,32 @@ import * as path from 'path';
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('ipynb-to-pdf.convert', () => {
         
-        // POSODOBLJENO: Preverimo najprej Notebook Editor (za .ipynb)
+        // CHECK: Get the active Notebook Editor (for .ipynb files)
         const activeNotebook = vscode.window.activeNotebookEditor;
         let filePath: string | undefined;
 
         if (activeNotebook) {
             filePath = activeNotebook.notebook.uri.fsPath;
         } else {
-            // Rezerva za navadne editorje
+            // Fallback for regular text editors
             filePath = vscode.window.activeTextEditor?.document.fileName;
         }
 
         if (!filePath || !filePath.endsWith('.ipynb')) {
-            vscode.window.showErrorMessage('Napaka: Odpri Jupyter zvezek (.ipynb), da ga lahko pretvoriš.');
+            vscode.window.showErrorMessage('Error: Please open a Jupyter Notebook (.ipynb) to convert it.');
             return;
         }
 
         const scriptPath = path.join(context.extensionPath, 'scripts', 'converter.py');
-        vscode.window.showInformationMessage(`Pretvarjam: ${path.basename(filePath)}...`);
+        vscode.window.showInformationMessage(`Converting: ${path.basename(filePath)}...`);
 
         exec(`python "${scriptPath}" "${filePath}"`, (error, stdout, stderr) => {
             if (error) {
-                vscode.window.showErrorMessage(`Napaka pri izvajanju: ${error.message}`);
+                vscode.window.showErrorMessage(`Execution error: ${error.message}`);
                 console.error(stderr);
                 return;
             }
-            vscode.window.showInformationMessage('PDF uspešno ustvarjen!');
+            vscode.window.showInformationMessage('PDF created successfully!');
         });
     });
 
